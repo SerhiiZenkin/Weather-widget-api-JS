@@ -1,8 +1,10 @@
 let weather = {
   apiKey: "87cab7f3a3825e6dfdf9b54d039e2056",
+
   getWeather: function (city) {
     fetch(
-      "https://api.openweathermap.org/data/2.5/weather?q=" +
+      // "https://api.openweathermap.org/data/2.5/weather?q=" +
+      "http://api.openweathermap.org/geo/1.0/direct?q=" +
         city +
         "&units=metric&appid=" +
         this.apiKey
@@ -13,14 +15,57 @@ let weather = {
         }
         return response.json();
       })
-      .then((data) => this. showWeather(data));
+      .then((array) => {
+        this.lat = array[0].lat;
+        this.lon = array[0].lon;
+        return [this.lat, this.lon];
+      })
+      .then((arr) => {
+        fetch(
+          "http://api.openweathermap.org/data/2.5/forecast?lat=" +
+            arr[0] +
+            "&lon=" +
+            arr[1] +
+            "&units=metric&appid=" +
+            this.apiKey
+        ).then((secondResponse)=> {return secondResponse.json();})
+        .then((data) => {
+        console.log(data);
+        this.showWeather(data)});
+      })          
   },
   showWeather: function (data) {
-    const name = data.name;
-    const { icon, description } = data.weather[0];
-    const { temp, humidity } = data.main;
-    const speed = data.wind.speed;
-    document.querySelector(".city").textContent = "Weather in " + name;
+    const name = data.city.name;
+    const icon = data.list[0].weather[0].icon;
+    const description = data.list[0].weather[0].description;
+    const temp = data.list[0].main.temp;
+    const humidity = data.list[0].main.humidity;
+    const speed = data.list[0].wind.speed;
+
+    const week = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]; 
+    const myDate = new Date( data.list[0].dt *1000);
+    const currentDay = week[myDate.getDay()];
+    const tommorow = new Date( data.list[5].dt_txt);
+    const forecastDay1 = week[tommorow.getDay()];
+    const tommorow_2 = new Date( data.list[13].dt_txt);
+    const forecastDay2 = week[tommorow_2.getDay()];
+    const tommorow_3= new Date( data.list[21].dt_txt);
+    const forecastDay3 = week[tommorow_3.getDay()];
+    const tommorow_4= new Date( data.list[29].dt_txt);
+    const forecastDay4 = week[tommorow_4.getDay()];
+
+   
+    document.querySelector(".first .day-name").textContent = forecastDay1;
+    document.querySelector(".first .day-temp").textContent = data.list[5].main.temp + "°C";
+    document.querySelector(".second .day-name").textContent = forecastDay2;
+    document.querySelector(".second .day-temp").textContent = data.list[13].main.temp + "°C";
+    document.querySelector(".third .day-name").textContent = forecastDay3;
+    document.querySelector(".third .day-temp").textContent = data.list[21].main.temp + "°C";
+    document.querySelector(".fourth .day-name").textContent = forecastDay4;
+    document.querySelector(".fourth .day-temp").textContent = data.list[29].main.temp + "°C";
+
+
+    document.querySelector(".city").textContent =`Weather in ${name} on ${currentDay}`;
     document.querySelector(".icon").src =
       "https://openweathermap.org/img/wn/" + icon + ".png";
     document.querySelector(".description").textContent = description;
@@ -32,10 +77,16 @@ let weather = {
     document.querySelector(".weather").classList.remove("loading");
     document.body.style.backgroundImage =
       "url('https://source.unsplash.com/1600x900/?" + name + "')";
+
+     
+         
   },
   search: function () {
     this.getWeather(document.querySelector(".search-bar").value);
   },
+
+  
+
 };
 
 document.querySelector(".search button").addEventListener("click", function () {
@@ -51,3 +102,5 @@ document
   });
 
 weather.getWeather("Kharkiv");
+
+
