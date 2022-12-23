@@ -21,7 +21,7 @@ let weather = {
       })
       .then((arr) => {
         fetch(
-          "http://api.openweathermap.org/data/2.5/forecast?lat=" +
+          "https://api.openweathermap.org/data/2.5/forecast?lat=" +
             arr[0] +
             "&lon=" +
             arr[1] +
